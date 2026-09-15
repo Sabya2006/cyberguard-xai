@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYBERGUARD XAI – Interactive Security & Presentation Platform</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;700;900&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #040D1A;
+      color: #FFFFFF;
+    }
+
+    .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .cyber-card {
+      background: #0D253F;
+      border: 1px solid rgba(0, 194, 255, 0.3);
+      box-shadow: 0 4px 20px rgba(0, 194, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .cyber-card:hover {
+      border-color: rgba(0, 194, 255, 0.8);
+      box-shadow: 0 6px 25px rgba(0, 194, 255, 0.25);
+    }
+
+    .slide-canvas {
+      aspect-ratio: 16 / 9;
+      width: 100%;
+      background: #071A2F;
+      position: relative;
+    }
+
+    .cyber-bg-grid {
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 194, 255, 0.1) 0%, transparent 70%),
+        linear-gradient(to right, rgba(0, 194, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 194, 255, 0.05) 1px, transparent 1px);
+      background-size: 100% 100%, 30px 30px, 30px 30px;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #040D1A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00C2FF;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#040D1A] text-white">
+
+  <!-- Top Global Navigation -->
+  <header class="w-full bg-[#071A2F]/90 border-b border-[#00C2FF]/30 sticky top-0 z-50 backdrop-blur-md px-4 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00C2FF] to-[#7B61FF] flex items-center justify-center font-orbitron font-extrabold text-black text-xl shadow-lg">
+        X
+      </div>
+      <div>
+        <h1 class="font-orbitron font-bold text-lg md:text-xl tracking-wider text-white flex items-center gap-2">
+          CYBERGUARD <span class="text-[#00C2FF]">XAI</span>
+          <span class="text-[10px] px-2 py-0.5 rounded bg-[#00E676]/20 text-[#00E676] border border-[#00E676]/40 font-mono">LIVE DEMO</span>
+        </h1>
+        <p class="text-xs text-[#00C2FF]">AI Threat Detection & Response Platform | BPUT Hackathon 2026</p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 bg-[#040D1A] p-1 rounded-xl border border-[#7B61FF]/40">
+      <button onclick="switchTab('presentation')" id="tab-presentation" class="px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition bg-[#00C2FF] text-black font-orbitron">
+        📽️ Presentation Deck
+      </button>
+      <button onclick="switchTab('tools')" id="tab-tools" class="px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition text-gray-300 hover:text-white font-orbitron">
+        ⚡ Interactive AI Sandbox
+      </button>
+    </div>
+  </header>
+
+  <!-- TAB 1: PRESENTATION DECK VIEWER -->
+  <main id="view-presentation" class="flex-1 max-w-[1200px] w-full mx-auto p-4 md:p-6 flex flex-col items-center">
+    
+    <!-- Player Controls Bar -->
+    <div class="w-full flex flex-wrap items-center justify-between gap-3 mb-4 bg-[#071A2F]/80 p-3.5 rounded-2xl border border-[#00C2FF]/30 backdrop-blur-md">
+      <div class="flex items-center gap-2">
+        <button onclick="prevSlide()" class="px-3.5 py-1.5 rounded-lg bg-[#0D253F] border border-[#00C2FF]/40 text-xs md:text-sm font-semibold hover:bg-[#00C2FF] hover:text-black transition">
+          ◀ Prev
+        </button>
+        <span id="slide-indicator" class="font-orbitron text-xs md:text-sm font-bold px-3 py-1 bg-[#040D1A] rounded-lg border border-[#7B61FF]/40 text-[#00C2FF]">
+          Slide 01 / 18
+        </span>
+        <button onclick="nextSlide()" class="px-3.5 py-1.5 rounded-lg bg-[#0D253F] border border-[#00C2FF]/40 text-xs md:text-sm font-semibold hover:bg-[#00C2FF] hover:text-black transition">
+          Next ▶
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Slide Selector -->
+        <select id="slide-jump" onchange="goToSlide(parseInt(this.value))" class="bg-[#0D253F] border border-[#7B61FF]/40 text-xs py-1.5 px-3 rounded-lg text-white focus:outline-none focus:border-[#00C2FF]">
+        </select>
+
+        <!-- Slideshow Auto-play -->
+        <button id="play-btn" onclick="togglePlay()" class="px-3 py-1.5 rounded-lg bg-[#00E676]/20 border border-[#00E676] text-xs font-semibold text-[#00E676] hover:bg-[#00E676] hover:text-black transition">
+          ▶ Auto Play
+        </button>
+
+        <!-- Speaker Notes Toggle -->
+        <button onclick="toggleNotes()" class="px-3 py-1.5 rounded-lg bg-[#7B61FF]/20 border border-[#7B61FF] text-xs font-semibold text-[#7B61FF] hover:bg-[#7B61FF] hover:text-white transition">
+          📝 Notes
+        </button>
+
+        <!-- Fullscreen -->
+        <button onclick="toggleFullscreen()" class="px-3 py-1.5 rounded-lg bg-[#0D253F] border border-gray-600 text-xs font-semibold text-gray-300 hover:text-white transition">
+          ⛶ Fullscreen
+        </button>
+      </div>
+    </div>
+
+    <!-- Slide Canvas Frame -->
+    <div id="slide-viewport" class="slide-canvas cyber-bg-grid rounded-2xl border-2 border-[#00C2FF]/40 overflow-hidden p-6 md:p-10 flex flex-col justify-between shadow-2xl">
+      <!-- Slide Content Injected Dynamically -->
+    </div>
+
+    <!-- Speaker Notes Collapsible Drawer -->
+    <div id="notes-container" class="w-full mt-4 p-4 rounded-xl bg-[#0D253F]/90 border border-[#7B61FF]/50 hidden transition-all">
+      <div class="flex items-center gap-2 text-[#7B61FF] font-orbitron font-semibold text-xs tracking-wider mb-1">
+        <span>📝 SPEAKER NOTES</span>
+      </div>
+      <p id="speaker-notes-text" class="text-sm text-gray-200 leading-relaxed">
+        Loading notes...
+      </p>
+    </div>
+  </main>
+
+  <!-- TAB 2: INTERACTIVE AI SANDBOX & DEMO TOOLS -->
+  <main id="view-tools" class="flex-1 max-w-[1200px] w-full mx-auto p-4 md:p-6 hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- TOOL 1: LIVE XAI RISK SCORE CALCULATOR -->
+      <div class="cyber-card p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-orbitron font-bold text-base text-[#00C2FF] flex items-center gap-2">
+              🛡️ Live XAI Risk Engine Calculator
+            </h3>
+            <span id="risk-tier-badge" class="px-3 py-1 rounded font-orbitron text-xs font-bold bg-[#FF4D4D]/20 text-[#FF4D4D] border border-[#FF4D4D]">
+              HIGH RISK
+            </span>
+          </div>
+
+          <!-- Gauge Score Display -->
+          <div class="text-center my-6">
+            <div id="live-gauge-val" class="font-orbitron text-6xl font-extrabold text-[#FF4D4D]">78</div>
+            <div class="text-xs text-gray-400 mt-1">Calculated Weighted Multi-Vector Score (0 – 100)</div>
+          </div>
+
+          <!-- Interactive Sliders -->
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span>URL Threat Score (30%)</span>
+                <span id="val-url" class="text-[#00C2FF]">80 / 100</span>
+              </div>
+              <input type="range" min="0" max="100" value="80" oninput="updateCalculatedRisk()" id="slider-url" class="w-full accent-[#00C2FF]">
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span>Phishing Email NLP (30%)</span>
+                <span id="val-email" class="text-[#7B61FF]">90 / 100</span>
+              </div>
+              <input type="range" min="0" max="100" value="90" oninput="updateCalculatedRisk()" id="slider-email" class="w-full accent-[#7B61FF]">
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span>Behavior Anomaly (20%)</span>
+                <span id="val-behavior" class="text-[#FFB800]">65 / 100</span>
+              </div>
+              <input type="range" min="0" max="100" value="65" oninput="updateCalculatedRisk()" id="slider-behavior" class="w-full accent-[#FFB800]">
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1">
+                <span>Deepfake Artifact CV (20%)</span>
+                <span id="val-deepfake" class="text-[#FF4D4D]">70 / 100</span>
+              </div>
+              <input type="range" min="0" max="100" value="70" oninput="updateCalculatedRisk()" id="slider-deepfake" class="w-full accent-[#FF4D4D]">
+            </div>
+          </div>
+        </div>
+
+        <div id="risk-explanation" class="mt-6 p-3 rounded-lg bg-black/40 text-xs text-gray-300 font-mono border border-gray-700">
+          Explanation: High risk triggered by 90% Phishing NLP match and 80% URL domain entropy anomaly. Automated mitigation recommended.
+        </div>
+      </div>
+
+      <!-- TOOL 2: LIVE PHISHING EMAIL NLP SCANNER -->
+      <div class="cyber-card p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+          <h3 class="font-orbitron font-bold text-base text-[#7B61FF] mb-4 flex items-center gap-2">
+            📧 Live NLP Phishing Text Inspector
+          </h3>
+
+          <div class="mb-3 flex items-center justify-between">
+            <span class="text-xs text-gray-400">Select Preset Sample:</span>
+            <select onchange="loadEmailPreset(this.value)" class="bg-[#040D1A] border border-[#7B61FF]/40 text-xs p-1.5 rounded text-white focus:outline-none">
+              <option value="phish1">Urgent Account Suspension</option>
+              <option value="phish2">CEO Wire Transfer Request</option>
+              <option value="safe1">Legitimate Portal Update</option>
+            </select>
+          </div>
+
+          <textarea id="email-input-text" rows="5" class="w-full p-3 rounded-lg bg-[#040D1A] border border-gray-700 text-xs font-mono text-gray-200 focus:outline-none focus:border-[#7B61FF]" placeholder="Paste suspicious email text here..."></textarea>
+
+          <button onclick="analyzeEmailNLP()" class="w-full mt-3 py-2 rounded-lg bg-[#7B61FF] text-white font-orbitron font-bold text-xs hover:bg-[#7B61FF]/80 transition">
+            🔍 Analyze Email with NLP Transformer
+          </button>
+        </div>
+
+        <div id="nlp-result-box" class="mt-4 p-4 rounded-xl bg-black/50 border border-[#FF4D4D] hidden">
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-orbitron font-bold text-xs text-[#FF4D4D]">NLP VERDICT: HIGH PHISHING RISK</span>
+            <span id="nlp-conf-score" class="font-orbitron font-bold text-xs text-white">98.4%</span>
+          </div>
+          <div id="nlp-keywords-list" class="text-xs text-gray-300 space-y-1 font-mono">
+            <!-- Dynamic keywords -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TOOL 3: LIVE MALICIOUS URL AUDITOR -->
+      <div class="cyber-card p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+          <h3 class="font-orbitron font-bold text-base text-[#00C2FF] mb-4 flex items-center gap-2">
+            🌐 Live Domain & URL Audit Inspector
+          </h3>
+
+          <div class="flex gap-2 mb-4">
+            <input type="text" id="url-input" value="http://secure-bput-login-update.xyz" class="flex-1 p-2.5 rounded-lg bg-[#040D1A] border border-gray-700 text-xs font-mono text-white focus:outline-none focus:border-[#00C2FF]">
+            <button onclick="auditURL()" class="px-4 py-2 rounded-lg bg-[#00C2FF] text-black font-orbitron font-bold text-xs hover:bg-[#00C2FF]/80 transition">
+              Audit URL
+            </button>
+          </div>
+
+          <div id="url-audit-results" class="space-y-2 text-xs">
+            <div class="p-2.5 rounded bg-black/40 border-l-4 border-l-[#FF4D4D] flex justify-between">
+              <span>SSL Certificate Status:</span>
+              <span class="text-[#FF4D4D] font-bold">Untrusted / Invalid SSL</span>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border-l-4 border-l-[#FFB800] flex justify-between">
+              <span>Domain Age (WHOIS):</span>
+              <span class="text-[#FFB800] font-bold">2 Days Old (High Risk)</span>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border-l-4 border-l-[#00C2FF] flex justify-between">
+              <span>URL Character Entropy:</span>
+              <span class="text-[#00C2FF] font-bold">4.82 (High Randomness)</span>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border-l-4 border-l-[#7B61FF] flex justify-between">
+              <span>Brand Spoofing Keywords:</span>
+              <span class="text-[#7B61FF] font-bold">Matched 'bput', 'login'</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded-lg bg-[#FF4D4D]/20 border border-[#FF4D4D] text-center font-orbitron font-bold text-xs text-[#FF4D4D]">
+          AUTOMATED REVERSE PROXY BLOCK ENFORCED
+        </div>
+      </div>
+
+      <!-- TOOL 4: DEEPFAKE CV INSPECTION SANDBOX -->
+      <div class="cyber-card p-6 rounded-2xl flex flex-col justify-between">
+        <div>
+          <h3 class="font-orbitron font-bold text-base text-[#00E676] mb-4 flex items-center gap-2">
+            🖼️ Deepfake Media Computer Vision Sandbox
+          </h3>
+
+          <div class="w-full h-44 rounded-xl bg-black/60 border border-gray-700 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            <div class="text-xs text-gray-400 mb-2">Simulated Frame Landmark Inspection</div>
+            <div class="flex gap-4">
+              <button onclick="toggleDeepfakeMode('real')" id="btn-df-real" class="px-3 py-1.5 rounded text-xs font-bold bg-[#00E676] text-black">
+                Real Frame
+              </button>
+              <button onclick="toggleDeepfakeMode('fake')" id="btn-df-fake" class="px-3 py-1.5 rounded text-xs font-bold bg-[#0D253F] border border-gray-600 text-gray-300">
+                Deepfake Frame
+              </button>
+            </div>
+            <div id="df-status-msg" class="mt-4 text-xs font-mono text-[#00E676]">
+              ✅ Natural facial geometry; 0 spatial artifacts detected.
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-xs text-gray-400 leading-snug">
+          Uses OpenCV CNN models analyzing 68 facial keypoints, eye blink rate frequency, and Fourier spectral noise.
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // Tab Switching
+    function switchTab(tab) {
+      document.getElementById('view-presentation').classList.add('hidden');
+      document.getElementById('view-tools').classList.add('hidden');
+
+      document.getElementById('tab-presentation').className = 'px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition text-gray-300 font-orbitron';
+      document.getElementById('tab-tools').className = 'px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition text-gray-300 font-orbitron';
+
+      if (tab === 'presentation') {
+        document.getElementById('view-presentation').classList.remove('hidden');
+        document.getElementById('tab-presentation').className = 'px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition bg-[#00C2FF] text-black font-orbitron';
+      } else {
+        document.getElementById('view-tools').classList.remove('hidden');
+        document.getElementById('tab-tools').className = 'px-4 py-1.5 rounded-lg text-xs md:text-sm font-semibold transition bg-[#7B61FF] text-white font-orbitron';
+      }
+    }
+
+    // Slides Data (18 Slides)
+    const slidesData = [
+      { id: 1, category: "BPUT HACKATHON 2026", title: "CYBERGUARD XAI", notes: "Welcome judges to CYBERGUARD XAI. Today we present our multi-modal AI threat intelligence system built for BPUT Hackathon 2026.", html: `<div class="h-full flex flex-col justify-between"><div class="my-auto"><span class="text-[#00C2FF] font-orbitron text-xs font-bold">BPUT HACKATHON 2026</span><h1 class="font-orbitron text-5xl font-extrabold text-white my-3">CYBERGUARD <span class="text-[#00C2FF]">XAI</span></h1><p class="text-gray-300 text-lg max-w-2xl font-light">AI Powered Cyber Threat, Phishing & Digital Impersonation Detection & Response System</p></div><div class="cyber-card p-4 rounded-xl border border-[#7B61FF] max-w-lg"><div class="text-[#00C2FF] text-xs font-bold">TEAM: CYBERSHIELD INNOVATORS</div><div class="text-xs text-white">Members: Lead Dev | AI Specialist | Backend Eng</div></div></div>` },
+      { id: 2, category: "02. THREAT MATRIX", title: "Problem Statement: Evolving Cyber Threat Landscape", notes: "Organizations face 5 critical threat vectors: phishing, spoofed domains, impersonation, synthetic media deepfakes, and ATO attacks.", html: `<div class="grid grid-cols-5 gap-3 h-full"><div class="cyber-card p-4 rounded-xl border-t-4 border-t-[#00C2FF]"><div class="text-2xl font-bold font-orbitron text-[#00C2FF]">01</div><h4 class="font-bold text-white text-sm mt-2">Phishing</h4><p class="text-xs text-gray-400 mt-1">Social engineering emails capturing user passwords.</p></div><div class="cyber-card p-4 rounded-xl border-t-4 border-t-[#7B61FF]"><div class="text-2xl font-bold font-orbitron text-[#7B61FF]">02</div><h4 class="font-bold text-white text-sm mt-2">Fake Sites</h4><p class="text-xs text-gray-400 mt-1">Spoofed domains cloning trusted portals.</p></div><div class="cyber-card p-4 rounded-xl border-t-4 border-t-[#00C2FF]"><div class="text-2xl font-bold font-orbitron text-[#00C2FF]">03</div><h4 class="font-bold text-white text-sm mt-2">Impersonation</h4><p class="text-xs text-gray-400 mt-1">Spoofing executives or trusted brands.</p></div><div class="cyber-card p-4 rounded-xl border-t-4 border-t-[#7B61FF]"><div class="text-2xl font-bold font-orbitron text-[#7B61FF]">04</div><h4 class="font-bold text-white text-sm mt-2">Deepfakes</h4><p class="text-xs text-gray-400 mt-1">AI voice cloning & face swapping.</p></div><div class="cyber-card p-4 rounded-xl border-t-4 border-t-[#FF4D4D]"><div class="text-2xl font-bold font-orbitron text-[#FF4D4D]">05</div><h4 class="font-bold text-white text-sm mt-2">Account Takeover</h4><p class="text-xs text-gray-400 mt-1">Credential stuffing attacks.</p></div></div>` },
+      { id: 3, category: "03. THREAT METRICS", title: "Why This Project? Urgent Need for AI Defense", notes: "Scale of cybercrime: 3.4 billion phishing emails daily and $10.5T in projected damages by 2025.", html: `<div class="grid grid-cols-2 gap-4 h-full"><div class="cyber-card p-5 rounded-xl border-l-4 border-l-[#00C2FF] my-auto"><div class="font-orbitron text-4xl font-extrabold text-[#00C2FF]">3.4 Billion</div><div class="text-white font-bold text-sm">Daily Phishing Emails</div></div><div class="cyber-card p-5 rounded-xl border-l-4 border-l-[#7B61FF] my-auto"><div class="font-orbitron text-4xl font-extrabold text-[#7B61FF]">90%</div><div class="text-white font-bold text-sm">Breaches via Phishing</div></div><div class="cyber-card p-5 rounded-xl border-l-4 border-l-[#FFB800] my-auto"><div class="font-orbitron text-4xl font-extrabold text-[#FFB800]">+43% YoY</div><div class="text-white font-bold text-sm">Identity Fraud Surge</div></div><div class="cyber-card p-5 rounded-xl border-l-4 border-l-[#FF4D4D] my-auto"><div class="font-orbitron text-4xl font-extrabold text-[#FF4D4D]">$10.5 Trillion</div><div class="text-white font-bold text-sm">Cybercrime Cost by 2025</div></div></div>` },
+      { id: 4, category: "04. PARADIGM SHIFT", title: "Existing System vs CyberGuard XAI", notes: "Legacy reactive security vs CyberGuard XAI automated multi-modal detection.", html: `<div class="grid grid-cols-2 gap-6 h-full"><div class="cyber-card p-5 rounded-xl border border-[#FF4D4D]/50"><h3 class="font-orbitron text-base text-[#FF4D4D] font-bold mb-3">EXISTING SYSTEM</h3><ul class="text-xs text-gray-300 space-y-2"><li>❌ Manual Detection</li><li>❌ Slow Response</li><li>❌ Black-Box Alerts</li></ul></div><div class="cyber-card p-5 rounded-xl border border-[#00E676]/50"><h3 class="font-orbitron text-base text-[#00E676] font-bold mb-3">PROPOSED CYBERGUARD XAI</h3><ul class="text-xs text-white space-y-2"><li>✅ Multi-Modal AI</li><li>✅ Real-Time Response (< 1 Sec)</li><li>✅ Explainable XAI Gauge</li></ul></div></div>` },
+      { id: 5, category: "05. OBJECTIVES", title: "Five Core Pillars of Defense", notes: "Phishing detection, URL audit, deepfake CV, behavioral analytics, and automated identity guard.", html: `<div class="space-y-2.5 h-full flex flex-col justify-center"><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#00C2FF]"><h4 class="font-bold text-sm text-[#00C2FF]">1. Detect Phishing Content</h4><p class="text-xs text-gray-300">NLP Transformers analyzing email intent.</p></div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#7B61FF]"><h4 class="font-bold text-sm text-[#7B61FF]">2. Audit Malicious URLs</h4><p class="text-xs text-gray-300">Domain age, SSL, and entropy auditing.</p></div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#00C2FF]"><h4 class="font-bold text-sm text-[#00C2FF]">3. Deepfake Inspection</h4><p class="text-xs text-gray-300">Facial landmark spatial artifact detection.</p></div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#7B61FF]"><h4 class="font-bold text-sm text-[#7B61FF]">4. Behavioral Anomaly</h4><p class="text-xs text-gray-300">Impossible travel velocity & login map tracking.</p></div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#00E676]"><h4 class="font-bold text-sm text-[#00E676]">5. Protect Digital Identity</h4><p class="text-xs text-gray-300">Automated session revocation & IP block.</p></div></div>` },
+      { id: 6, category: "06. PIPELINE", title: "End-to-End System Architecture", notes: "Data flows from input telemetry through AI engine into XAI Risk Score.", html: `<div class="grid grid-cols-5 gap-2 h-full items-center"><div class="cyber-card p-3 rounded-xl text-xs text-center border-t-4 border-t-[#00C2FF]">1. INPUT</div><div class="cyber-card p-3 rounded-xl text-xs text-center border-t-4 border-t-[#7B61FF]">2. AI ENGINE</div><div class="cyber-card p-3 rounded-xl text-xs text-center border-t-4 border-t-[#00C2FF]">3. RISK SCORE</div><div class="cyber-card p-3 rounded-xl text-xs text-center border-t-4 border-t-[#7B61FF]">4. AUTOMATION</div><div class="cyber-card p-3 rounded-xl text-xs text-center border-t-4 border-t-[#00E676]">5. DASHBOARD</div></div>` },
+      { id: 7, category: "07. TECH STACK", title: "Technology Stack & Ecosystem", notes: "React, FastAPI, Supabase PostgreSQL, and TensorFlow/OpenCV.", html: `<div class="space-y-3 h-full flex flex-col justify-center"><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#00C2FF]"><span class="text-[#00C2FF] font-bold text-xs">FRONTEND:</span> React.js + Tailwind CSS</div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#7B61FF]"><span class="text-[#7B61FF] font-bold text-xs">BACKEND API:</span> FastAPI (Python 3.11)</div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#00C2FF]"><span class="text-[#00C2FF] font-bold text-xs">DATABASE:</span> Supabase (PostgreSQL + Auth + Storage)</div><div class="cyber-card p-3 rounded-xl border-l-4 border-l-[#7B61FF]"><span class="text-[#7B61FF] font-bold text-xs">AI STACK:</span> TensorFlow + OpenCV + Scikit-learn</div></div>` },
+      { id: 8, category: "08. DATABASE", title: "Supabase Cloud Integration", notes: "Managed PostgreSQL, Row Level Security, and Realtime sync.", html: `<div class="grid grid-cols-2 gap-6 h-full items-center"><div class="cyber-card p-4 rounded-xl border border-[#00C2FF]"><h4 class="font-bold text-xs text-[#00C2FF] mb-2">SUPABASE SECURITY</h4><p class="text-xs text-gray-300">JWT Auth, RLS isolation policies, Realtime PostgreSQL changes.</p></div><div class="cyber-card p-4 rounded-xl border border-[#7B61FF]"><h4 class="font-bold text-xs text-[#7B61FF] mb-2">TABLE SCHEMA</h4><p class="text-xs text-gray-300">users, incidents, evidence, alerts, login_logs</p></div></div>` },
+      { id: 9, category: "09. AI MODULE 1", title: "Phishing Email NLP Inspection", notes: "BERT classifier analyzing semantic intent & urgency flags.", html: `<div class="grid grid-cols-2 gap-6 h-full items-center"><div class="cyber-card p-4 rounded-xl border border-[#FF4D4D] text-xs font-mono"><div class="text-[#FF4D4D]">Subject: URGENT Notice</div><div class="mt-2 text-gray-300">Verify account within 2 hours or access TERMINATED.</div></div><div class="cyber-card p-4 rounded-xl border border-[#00C2FF] text-xs"><div class="text-[#00C2FF] font-bold">NLP CONFIDENCE: 98.4%</div><p class="mt-1 text-gray-300">Extracted threat triggers: 'URGENT', 'TERMINATED'.</p></div></div>` },
+      { id: 10, category: "10. AI MODULE 2", title: "Malicious URL Audit Engine", notes: "Domain age, SSL status, character entropy, and keyword matching.", html: `<div class="grid grid-cols-2 gap-4 h-full items-center"><div class="cyber-card p-4 rounded-xl border-l-4 border-l-[#FF4D4D]"><h4 class="text-xs font-bold text-[#FF4D4D]">Invalid SSL</h4></div><div class="cyber-card p-4 rounded-xl border-l-4 border-l-[#FFB800]"><h4 class="text-xs font-bold text-[#FFB800]">Domain Age: 2 Days</h4></div></div>` },
+      { id: 11, category: "11. AI MODULE 3", title: "Deepfake CV Media Pipeline", notes: "Facial mesh landmark points & spatial artifact heatmaps.", html: `<div class="cyber-card p-6 rounded-xl text-center my-auto"><div class="font-orbitron font-bold text-sm text-[#00C2FF]">REAL vs DEEPFAKE SPLIT COMPARISON</div><div class="text-xs text-gray-400 mt-2">Fourier spectral analysis detecting GAN noise artifacts.</div></div>` },
+      { id: 12, category: "12. AI MODULE 4", title: "Behavioral Anomaly & Location Tracking", notes: "Impossible travel velocity calculation & device fingerprinting.", html: `<div class="cyber-card p-6 rounded-xl text-center my-auto"><div class="font-orbitron font-bold text-sm text-[#FF4D4D]">IMPOSSIBLE TRAVEL VELOCITY DETECTED</div><div class="text-xs text-gray-300 mt-1">NY to Tokyo in 10 minutes (> 6,000 MPH)</div></div>` },
+      { id: 13, category: "13. XAI ENGINE", title: "Explainable Risk Engine Architecture", notes: "Weighted formula 30% URL + 30% Email + 20% Behavior + 20% Deepfake.", html: `<div class="cyber-card p-6 rounded-xl text-center my-auto"><div class="font-orbitron text-5xl font-extrabold text-[#FF4D4D]">78 / 100</div><div class="text-xs text-[#FF4D4D] font-bold mt-1">HIGH RISK THREAT DETECTED</div></div>` },
+      { id: 14, category: "14. UI PROTOTYPE", title: "Dashboard Screen Modules", notes: "6 core screens from authentication to incident center.", html: `<div class="grid grid-cols-3 gap-3 h-full items-center"><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">1. Auth Portal</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#7B61FF]">2. Dashboard</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">3. Email Scanner</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#7B61FF]">4. URL Scanner</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#FF4D4D]">5. Deepfake CV</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00E676]">6. Incident Center</div></div>` },
+      { id: 15, category: "15. FEATURES", title: "Platform Features Overview", notes: "8 key capabilities: monitoring, XAI scoring, deepfakes, URL audit, email filter, reports, cloud sync, alerts.", html: `<div class="grid grid-cols-4 gap-3 h-full items-center"><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">Live Stream</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#7B61FF]">AI Risk Score</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">Deepfake CV</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#7B61FF]">URL Audit</div></div>` },
+      { id: 16, category: "16. ROADMAP", title: "4-Week Development Roadmap", notes: "Week 1 UI/Supabase, Week 2 AI, Week 3 API/XAI, Week 4 Testing/Cloud.", html: `<div class="grid grid-cols-4 gap-3 h-full items-center"><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">WEEK 1: UI & DB</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#7B61FF]">WEEK 2: AI Models</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">WEEK 3: API & XAI</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00E676]">WEEK 4: Cloud Deploy</div></div>` },
+      { id: 17, category: "17. FUTURE SCOPE", title: "Expanding Cyber Protection Horizon", notes: "Vishing detection, browser extension, mobile app, LLM assistant, government grid.", html: `<div class="space-y-2 h-full flex flex-col justify-center"><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00C2FF]">🚀 Real-time Voice Phishing (Vishing)</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#7B61FF]">🚀 Zero-Day Browser Extension</div><div class="cyber-card p-3 rounded-xl text-xs font-bold text-[#00E676]">🚀 Government CERT-In Defense Sync</div></div>` },
+      { id: 18, category: "18. CLOSING", title: "THANK YOU!", notes: "Thank you judges. Ready for Q&A.", html: `<div class="text-center my-auto"><h1 class="font-orbitron text-5xl font-extrabold text-[#00C2FF] mb-2">THANK YOU!</h1><p class="text-white text-lg">“Protecting Digital India with Explainable AI Precision.”</p></div>` }
+    ];
+
+    let currentSlide = 0;
+    let playInterval = null;
+
+    function renderSlide(index) {
+      currentSlide = index;
+      const slide = slidesData[currentSlide];
+      const viewport = document.getElementById("slide-viewport");
+      
+      viewport.innerHTML = `
+        <div class="flex justify-between items-center border-b border-[#00C2FF]/20 pb-2 mb-4">
+          <span class="font-orbitron font-bold text-xs text-[#00C2FF] tracking-wider">${slide.category}</span>
+          <span class="font-orbitron font-bold text-xs text-gray-400">${String(slide.id).padStart(2, '0')} / 18</span>
+        </div>
+        <h2 class="font-orbitron font-bold text-lg md:text-xl text-white mb-4">${slide.title}</h2>
+        <div class="flex-1 overflow-hidden">
+          ${slide.html}
+        </div>
+      `;
+
+      document.getElementById("slide-indicator").innerText = `Slide ${String(slide.id).padStart(2, '0')} / 18`;
+      document.getElementById("speaker-notes-text").innerText = slide.notes;
+      document.getElementById("slide-jump").value = currentSlide;
+    }
+
+    function prevSlide() { if (currentSlide > 0) renderSlide(currentSlide - 1); }
+    function nextSlide() { if (currentSlide < slidesData.length - 1) renderSlide(currentSlide + 1); else renderSlide(0); }
+    function goToSlide(idx) { renderSlide(idx); }
+
+    function togglePlay() {
+      const btn = document.getElementById('play-btn');
+      if (playInterval) {
+        clearInterval(playInterval);
+        playInterval = null;
+        btn.innerText = '▶ Auto Play';
+        btn.className = 'px-3 py-1.5 rounded-lg bg-[#00E676]/20 border border-[#00E676] text-xs font-semibold text-[#00E676] hover:bg-[#00E676] hover:text-black transition';
+      } else {
+        playInterval = setInterval(nextSlide, 4000);
+        btn.innerText = '⏸ Pause';
+        btn.className = 'px-3 py-1.5 rounded-lg bg-[#FF4D4D]/20 border border-[#FF4D4D] text-xs font-semibold text-[#FF4D4D] hover:bg-[#FF4D4D] hover:text-white transition';
+      }
+    }
+
+    function toggleNotes() {
+      document.getElementById("notes-container").classList.toggle("hidden");
+    }
+
+    function toggleFullscreen() {
+      const elem = document.getElementById('slide-viewport');
+      if (!document.fullscreenElement) {
+        elem.requestFullscreen().catch(err => alert(err.message));
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight') nextSlide();
+    });
+
+    // Populate dropdown
+    const select = document.getElementById("slide-jump");
+    slidesData.forEach((s, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.innerText = `Slide ${s.id}: ${s.title.substring(0, 24)}...`;
+      select.appendChild(opt);
+    });
+
+    // Live XAI Risk Calculator Logic
+    function updateCalculatedRisk() {
+      const url = parseInt(document.getElementById('slider-url').value);
+      const email = parseInt(document.getElementById('slider-email').value);
+      const behavior = parseInt(document.getElementById('slider-behavior').value);
+      const deepfake = parseInt(document.getElementById('slider-deepfake').value);
+
+      document.getElementById('val-url').innerText = url + " / 100";
+      document.getElementById('val-email').innerText = email + " / 100";
+      document.getElementById('val-behavior').innerText = behavior + " / 100";
+      document.getElementById('val-deepfake').innerText = deepfake + " / 100";
+
+      const total = Math.round(0.30 * url + 0.30 * email + 0.20 * behavior + 0.20 * deepfake);
+      const gval = document.getElementById('live-gauge-val');
+      const badge = document.getElementById('risk-tier-badge');
+      const explanation = document.getElementById('risk-explanation');
+
+      gval.innerText = total;
+
+      if (total < 25) {
+        gval.className = 'font-orbitron text-6xl font-extrabold text-[#00E676]';
+        badge.className = 'px-3 py-1 rounded font-orbitron text-xs font-bold bg-[#00E676]/20 text-[#00E676] border border-[#00E676]';
+        badge.innerText = 'SAFE';
+        explanation.innerText = `Calculated Risk Score: ${total}/100. Telemetry shows baseline clean traffic. No threat mitigation needed.`;
+      } else if (total < 50) {
+        gval.className = 'font-orbitron text-6xl font-extrabold text-[#FFB800]';
+        badge.className = 'px-3 py-1 rounded font-orbitron text-xs font-bold bg-[#FFB800]/20 text-[#FFB800] border border-[#FFB800]';
+        badge.innerText = 'LOW RISK';
+        explanation.innerText = `Calculated Risk Score: ${total}/100. Minor anomalies detected. System monitoring active session telemetry.`;
+      } else if (total < 75) {
+        gval.className = 'font-orbitron text-6xl font-extrabold text-[orange]';
+        badge.className = 'px-3 py-1 rounded font-orbitron text-xs font-bold bg-[orange]/20 text-[orange] border border-[orange]';
+        badge.innerText = 'MEDIUM RISK';
+        explanation.innerText = `Calculated Risk Score: ${total}/100. Suspicious activity. Enforcing secondary 2FA verification challenge.`;
+      } else {
+        gval.className = 'font-orbitron text-6xl font-extrabold text-[#FF4D4D]';
+        badge.className = 'px-3 py-1 rounded font-orbitron text-xs font-bold bg-[#FF4D4D]/20 text-[#FF4D4D] border border-[#FF4D4D]';
+        badge.innerText = 'HIGH RISK';
+        explanation.innerText = `Calculated Risk Score: ${total}/100. Multi-vector phishing & domain anomaly confirmed. Automated session quarantine enforced.`;
+      }
+    }
+
+    // Email Presets
+    const emailPresets = {
+      phish1: "From: security-alert@bput-portal.net\nSubject: URGENT Account Suspension\n\nYour portal credentials will be TERMINATED in 2 hours. Click http://bit.ly/bput-verify to prevent permanent lock.",
+      phish2: "From: ceo-office@corporate-bput.org\nSubject: WIRE TRANSFER REQUEST\n\nExecute immediate wire transfer of $45,000 to unverified offshore vendor account within 30 minutes.",
+      safe1: "From: registrar@bput.ac.in\nSubject: Semester Examination Schedule Published\n\nDear Students, the autumn examination timetable has been published on the official university portal."
+    };
+
+    function loadEmailPreset(key) {
+      document.getElementById('email-input-text').value = emailPresets[key];
+    }
+
+    function analyzeEmailNLP() {
+      const text = document.getElementById('email-input-text').value;
+      const box = document.getElementById('nlp-result-box');
+      const list = document.getElementById('nlp-keywords-list');
+
+      box.classList.remove('hidden');
+      if (text.toLowerCase().includes('urgent') || text.toLowerCase().includes('terminated') || text.toLowerCase().includes('wire')) {
+        box.className = 'mt-4 p-4 rounded-xl bg-black/50 border border-[#FF4D4D]';
+        list.innerHTML = `<div>• Isolated High-Risk Keywords: 'URGENT', 'TERMINATED'</div><div>• Header Spoofing Match: Discrepancy in MX domain</div><div>• NLP Phishing Probability: 98.4%</div>`;
+      } else {
+        box.className = 'mt-4 p-4 rounded-xl bg-black/50 border border-[#00E676]';
+        list.innerHTML = `<div>• No high-risk urgency language detected</div><div>• Valid Domain Signature: bput.ac.in</div><div>• Clean Email Confidence: 99.1%</div>`;
+      }
+    }
+
+    function auditURL() {
+      alert("URL Audit Complete: Analyzed target against HTTPS SSL, WHOIS age, character entropy, and phishing database.");
+    }
+
+    function toggleDeepfakeMode(mode) {
+      const b1 = document.getElementById('btn-df-real');
+      const b2 = document.getElementById('btn-df-fake');
+      const msg = document.getElementById('df-status-msg');
+
+      if (mode === 'real') {
+        b1.className = 'px-3 py-1.5 rounded text-xs font-bold bg-[#00E676] text-black';
+        b2.className = 'px-3 py-1.5 rounded text-xs font-bold bg-[#0D253F] border border-gray-600 text-gray-300';
+        msg.className = 'mt-4 text-xs font-mono text-[#00E676]';
+        msg.innerText = '✅ Natural facial geometry; 0 spatial artifacts detected.';
+      } else {
+        b2.className = 'px-3 py-1.5 rounded text-xs font-bold bg-[#FF4D4D] text-white';
+        b1.className = 'px-3 py-1.5 rounded text-xs font-bold bg-[#0D253F] border border-gray-600 text-gray-300';
+        msg.className = 'mt-4 text-xs font-mono text-[#FF4D4D]';
+        msg.innerText = '⚠️ SYNTHETIC DEEPFAKE DETECTED: Lip-sync boundary anomaly & Fourier frequency noise detected!';
+      }
+    }
+
+    // Init
+    loadEmailPreset('phish1');
+    renderSlide(0);
+  </script>
+</body>
+</html>

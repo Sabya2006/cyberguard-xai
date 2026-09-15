@@ -1,0 +1,16 @@
+{
+  "name": "CYBERGUARD XAI — Cybersecurity SaaS",
+  "short_name": "CYBERGUARD",
+  "description": "Next-generation Explainable AI threat mitigation platform against phishing, deepfakes, and identity anomalies.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#040D1A",
+  "theme_color": "#00C2FF",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}
