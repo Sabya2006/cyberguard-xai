@@ -1,6 +1,6 @@
 -- ========================================================
--- CYBERGUARD XAI — DATABASE MIGRATION & RLS POLICIES
--- PostgreSQL Schema for Supabase Deployment
+-- CYBERGUARD XAI — IDEMPOTENT DATABASE MIGRATION & RLS POLICIES
+-- Safe for repeated execution without 42710 policy errors
 -- ========================================================
 
 -- Enable UUID Extension
@@ -20,10 +20,12 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 -- Enable RLS for Profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
 CREATE POLICY "Users can view their own profile"
     ON public.profiles FOR SELECT
     USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile"
     ON public.profiles FOR UPDATE
     USING (auth.uid() = id);
@@ -45,10 +47,12 @@ CREATE TABLE IF NOT EXISTS public.scans (
 -- Enable RLS for Scans
 ALTER TABLE public.scans ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own scans" ON public.scans;
 CREATE POLICY "Users can view their own scans"
     ON public.scans FOR SELECT
     USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert scans" ON public.scans;
 CREATE POLICY "Users can insert scans"
     ON public.scans FOR INSERT
     WITH CHECK (auth.uid() = user_id);
@@ -71,11 +75,13 @@ CREATE TABLE IF NOT EXISTS public.incidents (
 -- Enable RLS for Incidents
 ALTER TABLE public.incidents ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Authenticated users can view incidents" ON public.incidents;
 CREATE POLICY "Authenticated users can view incidents"
     ON public.incidents FOR SELECT
     TO authenticated
     USING (true);
 
+DROP POLICY IF EXISTS "Analysts can update incident status" ON public.incidents;
 CREATE POLICY "Analysts can update incident status"
     ON public.incidents FOR UPDATE
     TO authenticated
@@ -97,6 +103,7 @@ CREATE TABLE IF NOT EXISTS public.licenses (
 -- Enable RLS for Licenses
 ALTER TABLE public.licenses ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins can manage all licenses" ON public.licenses;
 CREATE POLICY "Admins can manage all licenses"
     ON public.licenses FOR ALL
     TO authenticated
