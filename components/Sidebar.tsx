@@ -14,6 +14,10 @@ import {
   Building2,
   ShieldCheck,
   LogOut,
+  BookOpen,
+  Flame,
+  Scale,
+  Users,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -25,22 +29,26 @@ export default function Sidebar() {
     { name: "URL Auditor", href: "/dashboard/url-scanner", icon: Globe },
     { name: "Deepfake CV", href: "/dashboard/deepfake", icon: Camera },
     { name: "Behaviour Analytics", href: "/dashboard/behaviour", icon: Activity },
+    { name: "XAI Storytelling", href: "/dashboard/xai-storytelling", icon: BookOpen, badge: "NLP" },
+    { name: "Dynamic Honeypots", href: "/dashboard/honeypots", icon: Flame },
+    { name: "Victim FIR Recovery", href: "/dashboard/victim-recovery", icon: Scale, badge: "Legal" },
+    { name: "Consumer Intelligence", href: "/dashboard/consumer-intelligence", icon: Users },
+    { name: "3D IP Geolocation", href: "/dashboard/ip-tracking", icon: Globe },
     { name: "Incident Center", href: "/dashboard/incidents", icon: AlertTriangle, badge: "3 New" },
     { name: "Executive Reports", href: "/dashboard/reports", icon: FileText },
     { name: "Admin Business Suite", href: "/dashboard/admin", icon: Building2, badge: "Admin" },
   ];
 
   return (
-    <aside className="w-64 shrink-0 border-r border-[#00C2FF]/20 bg-[#071A2F]/90 p-4 flex flex-col justify-between hidden md:flex">
+    <aside className="w-64 shrink-0 border-r border-[#00C2FF]/20 bg-[#071A2F]/90 p-4 flex flex-col justify-between hidden md:flex overflow-y-auto">
       <div>
-        <div className="px-2 mb-6">
+        <div className="px-2 mb-4">
           <CyberLogo size="sm" href="/" />
         </div>
 
         <div className="text-[10px] font-orbitron font-bold text-gray-500 uppercase tracking-wider px-3 mb-2">
           MODULE NAVIGATION
         </div>
-
 
         <nav className="space-y-1">
           {menu.map((item) => {
@@ -50,7 +58,7 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold font-orbitron transition-all ${
+                className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold font-orbitron transition-all ${
                   isActive
                     ? "bg-gradient-to-r from-[#00C2FF]/20 to-[#7B61FF]/20 border border-[#00C2FF] text-[#00C2FF]"
                     : "text-gray-300 hover:text-white hover:bg-[#0D253F]"
@@ -61,8 +69,10 @@ export default function Sidebar() {
                   <span>{item.name}</span>
                 </div>
                 {item.badge && (
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                    item.badge === 'Admin' ? 'bg-[#7B61FF]/20 text-[#7B61FF] border border-[#7B61FF]/40' : 'bg-[#FF4D4D]/20 text-[#FF4D4D] border border-[#FF4D4D]/40'
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold ${
+                    item.badge === 'Admin' ? 'bg-[#7B61FF]/20 text-[#7B61FF] border border-[#7B61FF]/40' :
+                    item.badge === 'Legal' ? 'bg-[#00E676]/20 text-[#00E676] border border-[#00E676]/40' :
+                    'bg-[#FF4D4D]/20 text-[#FF4D4D] border border-[#FF4D4D]/40'
                   }`}>
                     {item.badge}
                   </span>
@@ -74,18 +84,18 @@ export default function Sidebar() {
       </div>
 
       {/* Footer Profile Box */}
-      <div className="rounded-xl bg-[#0D253F] p-3 border border-[#00C2FF]/30">
-        <div className="flex items-center justify-between mb-2">
+      <div className="rounded-xl bg-[#0D253F] p-3 border border-[#00C2FF]/30 mt-4">
+        <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-[#00E676]" />
             <span className="text-xs font-bold text-white">Active License</span>
           </div>
           <span className="text-[10px] font-mono text-[#00C2FF]">BUSINESS</span>
         </div>
-        <div className="text-[11px] text-gray-400 font-mono mb-3">API Quota: 18,420 / 25,000</div>
+        <div className="text-[10px] text-gray-400 font-mono mb-2">API Quota: 18,420 / 25,000</div>
         <Link
           href="/auth"
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#040D1A] border border-gray-700 py-1.5 text-xs text-gray-300 hover:text-white hover:border-[#FF4D4D]"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#040D1A] border border-gray-700 py-1 text-xs text-gray-300 hover:text-white hover:border-[#FF4D4D]"
         >
           <LogOut className="h-3.5 w-3.5" />
           <span>Sign Out</span>
