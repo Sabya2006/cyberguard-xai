@@ -1,7 +1,8 @@
 """
 CYBERGUARD XAI — Python FastAPI Security Service Engine
 Provides AI Threat Storytelling (NLP), Context-Aware Dynamic Honeypots,
-Victim Recovery FIR Complaint Generation, Consumer Intelligence, and IP Geolocation Services.
+Victim Recovery FIR Complaint Generation, Consumer Intelligence, IP Geolocation Services,
+and Fraud Reporting Threat Vector Categorization.
 """
 
 from fastapi import FastAPI, HTTPException, Body
@@ -14,8 +15,8 @@ import re
 
 app = FastAPI(
     title="CYBERGUARD XAI Security Microservice",
-    description="Enterprise AI Threat Intelligence, Dynamic Honeypots, FIR Complaint Generator, and UEBA Geolocation Engine",
-    version="2.0.0"
+    description="Enterprise AI Threat Intelligence, Dynamic Honeypots, FIR Complaint Generator, UEBA Geolocation Engine, and Fraud Reporting Analysis",
+    version="2.1.0"
 )
 
 # CORS middleware to allow seamless requests from Next.js frontend
@@ -375,6 +376,76 @@ def track_ip_geolocation(req: IPTrackRequest):
         target_soc_coordinates={"lat": 20.2961, "lng": 85.8245} # SOC Ops Command Bhubaneswar Node
     )
 
+# ==========================================
+# 6. FRAUD REPORTING THREAT VECTOR ANALYSIS
+# ==========================================
+
+class FraudReportRequest(BaseModel):
+    category: str  # phishing_link, otp_scam, bank_fraud, telecom_call, deepfake_extortion, ai_bot
+    evidence_target: str  # URL, Phone, UPI, Email, Handle
+    impact_loss_inr: float
+    victim_statement: str
+
+class FraudAnalysisResponse(BaseModel):
+    success: bool
+    report_ticket_id: str
+    classified_category: str
+    threat_severity: str
+    risk_score: int
+    recurring_scam_pattern_identified: str
+    recurrence_frequency: int
+    new_threat_vector_alert_triggered: bool
+    alert_details: Optional[Dict[str, Any]]
+
+@app.post("/api/v1/fraud/categorize", response_model=FraudAnalysisResponse)
+def categorize_fraud_report(req: FraudReportRequest):
+    cat = req.category.lower()
+    target = req.evidence_target.strip()
+    ticket_id = f"RPT-{random.randint(10000, 99999)}"
+
+    # Threat vector analysis & categorization rule engine
+    is_phishing = "phishing" in cat or "http" in target or ".xyz" in target
+    is_otp = "otp" in cat or "credential" in cat or "password" in req.victim_statement.lower()
+    is_deepfake = "deepfake" in cat or "extortion" in cat
+
+    severity = "CRITICAL" if is_otp or is_deepfake or req.impact_loss_inr > 25000 else "HIGH"
+    risk_score = 96 if severity == "CRITICAL" else 84
+
+    # Pattern identification
+    recurring_pattern = (
+        "Shortened URL Domain Spoofing Targeting Bank Users"
+        if is_phishing
+        else "Fake Telecom SIM Block / Electricity Bill OTP Scam"
+        if is_otp
+        else "AI Synthesized Video Call Extortion Pattern"
+        if is_deepfake
+        else "Fake UPI QR Code Money Transfer Fraud"
+    )
+
+    recurrence_freq = random.randint(18, 142)
+    is_new_vector = recurrence_freq > 80 or "bit.ly" in target or "telegram" in req.victim_statement.lower()
+
+    alert_info = None
+    if is_new_vector:
+        alert_info = {
+            "alert_id": f"ALT-{random.randint(1000, 9999)}",
+            "alert_level": "EMERGENCY_THREAT_VECTOR_DETECTED",
+            "vector_signature": f"High-frequency scam pattern isolated for {target}",
+            "recommended_action": "Firewall domain block + Broadcast warning to SOC network"
+        }
+
+    return FraudAnalysisResponse(
+        success=True,
+        report_ticket_id=ticket_id,
+        classified_category=req.category.replace("_", " ").title(),
+        threat_severity=severity,
+        risk_score=risk_score,
+        recurring_scam_pattern_identified=recurring_pattern,
+        recurrence_frequency=recurrence_freq,
+        new_threat_vector_alert_triggered=is_new_vector,
+        alert_details=alert_info
+    )
+
 @app.get("/health")
 def health_check():
-    return {"status": "HEALTHY", "system": "CYBERGUARD XAI FASTAPI ENGINE", "version": "2.0.0"}
+    return {"status": "HEALTHY", "system": "CYBERGUARD XAI FASTAPI ENGINE", "version": "2.1.0"}

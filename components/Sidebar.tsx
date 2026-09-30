@@ -18,6 +18,7 @@ import {
   Flame,
   Scale,
   Users,
+  ShieldAlert,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -25,6 +26,7 @@ export default function Sidebar() {
 
   const menu = [
     { name: "SOC Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Victim Fraud Portal", href: "/dashboard/fraud-reporting", icon: ShieldAlert, badge: "New" },
     { name: "Phishing Inspector", href: "/dashboard/phishing", icon: Mail },
     { name: "URL Auditor", href: "/dashboard/url-scanner", icon: Globe },
     { name: "Deepfake CV", href: "/dashboard/deepfake", icon: Camera },
